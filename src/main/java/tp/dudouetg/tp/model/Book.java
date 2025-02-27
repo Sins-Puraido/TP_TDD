@@ -10,7 +10,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "book")
-@PrimaryKeyJoinColumn("id")
 @Getter
 @Setter
 public class Book extends PersistentEntity {

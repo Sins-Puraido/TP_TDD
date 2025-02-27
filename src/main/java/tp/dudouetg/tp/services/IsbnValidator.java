@@ -23,6 +23,4 @@ public class IsbnValidator {
         }
         return total % 11 == 0;
     }
-
-
 }

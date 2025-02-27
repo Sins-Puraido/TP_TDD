@@ -1,7 +1,9 @@
 package tp.dudouetg.tp.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
@@ -10,6 +12,8 @@ import java.util.Date;
 @Table(name = "reservation")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Reservation extends PersistentEntity {
 
     @ManyToOne

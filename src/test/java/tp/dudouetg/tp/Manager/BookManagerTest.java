@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import tp.dudouetg.tp.exception.InvalidBookFormatException;
+import tp.dudouetg.tp.exception.InvalidFieldNameException;
 import tp.dudouetg.tp.exception.InvalidIsbnLengthException;
+import tp.dudouetg.tp.exception.IsdbNotInDBException;
 import tp.dudouetg.tp.model.Book;
 import tp.dudouetg.tp.services.BookDataService;
 
@@ -44,7 +46,7 @@ public class BookManagerTest {
     public void BookCreationAsInvalidIsbn_ShouldThrowException() {
         Book book = new Book("1984", "George Orwell", "invalid_isbn", "Secker & Warburg", "Poche", true);
 
-        assertThrows(InvalidIsbnLengthException.class, () -> bookManager.isValidBookIsbn(book.getIsbn()));
+        assertThrows(InvalidIsbnLengthException.class, () -> bookManager.createBook(book));
 
     }
 
@@ -53,18 +55,23 @@ public class BookManagerTest {
      * -------------------------------------------------------*/
 
     @Test
-    public void getBookByAuthor_shouldReturnBook() {
+    public void getBookByAuthor_shouldReturnBookArray() {
         Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book));
-        assertEquals(1, bookManager.getBooksByAuthor("George Orwell").size());
+        Book book2 = new Book("1984", "George", "1234567890", "Secker & Warburg", "Poche", true);
+        Book book3 = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book, book3));
+        assertEquals(2, bookManager.getBooksByAuthor("George Orwell").size());
 
     }
 
     @Test
-    public void getBookByName_shouldReturnBook() {
+    public void getBookByName_shouldReturnBookArray() {
         Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book));
-        assertEquals(1, bookManager.getBooksByAuthor("George Orwell").size());
+        Book book2 = new Book("1984", "George Orwell", "1234567890", "Harper Perennial", "Poche", true);
+        Book book3 = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+
+        when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book, book2));
+        assertEquals(2, bookManager.getBooksByAuthor("George Orwell").size());
     }
 
     @Test
@@ -91,6 +98,7 @@ public class BookManagerTest {
         when(fakeDatabaseService.getBook("2253009687")).thenReturn(null);
         when(fakeWebService.getBook("2253009687")).thenReturn(book);
 
+        bookManager.getBook("2253009687");
         verify(fakeDatabaseService).saveBook(bookArgumentCaptor.capture());
     }
 
@@ -118,7 +126,7 @@ public class BookManagerTest {
         String newTitle = "la ferme aux animaux";
         when(fakeDatabaseService.updateBook(book, "title", newTitle)).thenReturn(expectedBook);
         Book updatedBook = bookManager.updateBook(book, "title", newTitle);
-        assertEquals(updatedBook.toString(), book.toString());
+        assertEquals(expectedBook.toString(), updatedBook.toString());
     }
 
 
@@ -137,8 +145,7 @@ public class BookManagerTest {
         Book expectedBook = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
         String newTitle = "la ferme aux animaux";
         when(fakeDatabaseService.updateBook(book, "invalideField", newTitle)).thenReturn(book);
-        Book updatedBook = bookManager.updateBook(book, "invalidField", newTitle);
-        assertEquals(updatedBook.toString(), book.toString());
+        assertThrows(InvalidFieldNameException.class, () -> bookManager.updateBook(book, "invalidField", newTitle));
     }
 
     /* -------------------------------------------------------
@@ -146,13 +153,13 @@ public class BookManagerTest {
      * -------------------------------------------------------*/
     @Test
     public void BookToDeleteISNotInDB_ShouldReturnFalse() {
-        doNothing().when(fakeDatabaseService).removeBook("2253009687");
-        assertFalse(bookManager.deleteBook("2253009687"));
+        when(fakeDatabaseService.removeBook("2253009687")).thenThrow(IsdbNotInDBException.class);
+        assertThrows(IsdbNotInDBException.class, () -> bookManager.deleteBook("2253009687"));
+
     }
 
     @Test
     public void BookDeletionWorked_ShouldReturnTrue() {
-        doNothing().when(fakeDatabaseService).removeBook("2253009687");
         assertTrue(bookManager.deleteBook("2253009687"));
     }
 

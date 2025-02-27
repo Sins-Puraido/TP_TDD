@@ -35,11 +35,11 @@ public class BookManager {
         return databaseService.getBook(isbn);
     }
 
-    public Book updateBook(Book book) {
-        return databaseService.updateBook(book);
+    public Book updateBook(Book book,  String fields, String value) {
+        return databaseService.updateBook(book, fields, value);
     }
 
     public boolean deleteBook(String isbn) {
-        return true;
+        return databaseService.removeBook(isbn);
     }
 }

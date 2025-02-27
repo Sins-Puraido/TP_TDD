@@ -2,6 +2,8 @@ package tp.dudouetg.tp.Manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import tp.dudouetg.tp.exception.InvalidBookFormatException;
 import tp.dudouetg.tp.exception.InvalidIsbnLengthException;
 import tp.dudouetg.tp.model.Book;
 import tp.dudouetg.tp.services.BookDataService;
@@ -39,13 +41,12 @@ public class BookManagerTest {
     }
 
     @Test
-    public void BookCreationAsInvalidIsbn_ShouldReturnFalse() {
+    public void BookCreationAsInvalidIsbn_ShouldThrowException() {
         Book book = new Book("1984", "George Orwell", "invalid_isbn", "Secker & Warburg", "Poche", true);
 
         assertThrows(InvalidIsbnLengthException.class, () -> bookManager.isValidBookIsbn(book.getIsbn()));
 
     }
-
 
     /* -------------------------------------------------------
      * READ
@@ -85,13 +86,25 @@ public class BookManagerTest {
     @Test
     public void givenBookIsNotInDB_bookFromWebserviceIsStoredInDB() {
         Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        ArgumentCaptor<Book> bookArgumentCaptor = ArgumentCaptor.forClass(Book.class);
+
         when(fakeDatabaseService.getBook("2253009687")).thenReturn(null);
         when(fakeWebService.getBook("2253009687")).thenReturn(book);
-        assertEquals(book, bookManager.getBook("2253009687"));
+
+        verify(fakeDatabaseService).saveBook(bookArgumentCaptor.capture());
     }
 
     @Test
     public void givenBookIsInDBMissingData_bookWithMissingDataFromWebService() {
+        Book bookFromDB = new Book("1984", "George Orwell", "2253009687", "", "", true);
+        Book bookFromWebService = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        ArgumentCaptor<Book> bookArgumentCaptor = ArgumentCaptor.forClass(Book.class);
+
+        when(fakeDatabaseService.getBook("2253009687")).thenReturn(bookFromDB);
+        when(fakeWebService.getBook("2253009687")).thenReturn(bookFromWebService);
+
+        assertEquals(bookFromWebService, bookManager.getBook("2253009687"));
+        verify(fakeDatabaseService, times(1)).updateAllBooksData(bookFromDB.getIsbn(), bookFromWebService);
 
     }
 
@@ -101,28 +114,31 @@ public class BookManagerTest {
     @Test
     public void BookModificationIsValid_ShouldReturnModifiedBook() {
         Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        when(fakeDatabaseService.updateBook(book)).thenReturn(book);
-        Book updatedBook = bookManager.updateBook(book);
-        assertNotNull(updatedBook);
+        Book expectedBook = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        String newTitle = "la ferme aux animaux";
+        when(fakeDatabaseService.updateBook(book, "title", newTitle)).thenReturn(expectedBook);
+        Book updatedBook = bookManager.updateBook(book, "title", newTitle);
+        assertEquals(updatedBook.toString(), book.toString());
     }
 
-    @Test
-    public void BookModificationIsbnIsInvalid_ShouldReturnException() {
-        Book originalBook = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-
-        when(fakeDatabaseService.updateBook(originalBook, "format", "Broché")).thenReturn(book);
-        Book updatedBook = bookManager.updateBook(book);
-        assertNotNull(updatedBook);
-    }
 
     @Test
     public void BookModificationFormatIsInvalid_ShouldReturnException() {
-
+        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        Book expectedBook = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "newFormat", true);
+        String newFormat = "Invalide Format";
+        when(fakeDatabaseService.updateBook(book, "title", newFormat)).thenReturn(book);
+        assertThrows(InvalidBookFormatException.class, () -> bookManager.updateBook(book, "format", newFormat));
     }
 
     @Test
     public void BookModificationFieldIsInvalid_ShouldReturnException() {
-
+        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        Book expectedBook = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        String newTitle = "la ferme aux animaux";
+        when(fakeDatabaseService.updateBook(book, "invalideField", newTitle)).thenReturn(book);
+        Book updatedBook = bookManager.updateBook(book, "invalidField", newTitle);
+        assertEquals(updatedBook.toString(), book.toString());
     }
 
     /* -------------------------------------------------------

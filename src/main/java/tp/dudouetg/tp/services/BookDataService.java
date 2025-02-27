@@ -24,11 +24,18 @@ public interface BookDataService {
         return new ArrayList<Book>();
     }
 
-    default void removeBook(String Isbn){}
+    default boolean removeBook(String Isbn){
+        return true;
+    }
 
    default Book updateBook(Book book, String fields, String value) {
         return book;
    }
+
+   default Book updateAllBooksData(String isbn, Book book) {
+        return null;
+   }
+
 
    default Boolean changeBookReservationStatus(String Isbn) {
         return false;

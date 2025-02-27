@@ -5,7 +5,7 @@ import tp.dudouetg.tp.exception.InvalidIsbnLengthException;
 
 public class IsbnValidator {
 
-    boolean validateIsbn(String isbn) {
+    public boolean validateIsbn(String isbn) {
         if (isbn.length() != 10)
             throw new InvalidIsbnLengthException();
 

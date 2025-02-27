@@ -2,20 +2,19 @@ package tp.dudouetg.tp.Manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tp.dudouetg.tp.services.MemberService;
-import tp.dudouetg.tp.services.ReservationService;
+import tp.dudouetg.tp.services.ReservationDataService;
 
 import static org.mockito.Mockito.mock;
 
 public class ReservationManagerTest {
 
-    private ReservationService fakeDatabaseService;
-    private ReservationService fakeWebService;
+    private ReservationDataService fakeDatabaseService;
+    private ReservationDataService fakeWebService;
 
     @BeforeEach
     public void setUp() {
-        fakeDatabaseService = mock(ReservationService.class);
-        fakeWebService = mock(ReservationService.class);
+        fakeDatabaseService = mock(ReservationDataService.class);
+        fakeWebService = mock(ReservationDataService.class);
     }
 
 
@@ -62,4 +61,7 @@ public class ReservationManagerTest {
 
     @Test
     public void GiveBackDateTooLate_shouldReturnInvalidReservationDateException() {}
+
+
+    //envois mail a tout les utilisateur qui ont commende a échéance
 }

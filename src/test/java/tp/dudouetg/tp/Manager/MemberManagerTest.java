@@ -2,19 +2,19 @@ package tp.dudouetg.tp.Manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tp.dudouetg.tp.services.MemberService;
+import tp.dudouetg.tp.services.MemberDataService;
 
 import static org.mockito.Mockito.mock;
 
 public class MemberManagerTest {
 
-    private MemberService fakeDatabaseService;
-    private MemberService fakeWebService;
+    private MemberDataService fakeDatabaseService;
+    private MemberDataService fakeWebService;
 
     @BeforeEach
     public void setUp() {
-        fakeDatabaseService = mock(MemberService.class);
-        fakeWebService = mock(MemberService.class);
+        fakeDatabaseService = mock(MemberDataService.class);
+        fakeWebService = mock(MemberDataService.class);
     }
 
     /* -------------------------------------------------------
@@ -40,6 +40,9 @@ public class MemberManagerTest {
     public void GivenMemberIsNotInDB_ShouldReturnMember() {
     }
 
+    @Test
+    public void GetMemberReservation_shouldReturnReservations() {}
+
     /* -------------------------------------------------------
      * UPDATE
      * -------------------------------------------------------*/
@@ -51,7 +54,6 @@ public class MemberManagerTest {
     public void MemberModificationIsInvalid_ShouldReturnFalse() {
     }
 
-
     /* -------------------------------------------------------
      * DELETE
      * -------------------------------------------------------*/
@@ -62,5 +64,13 @@ public class MemberManagerTest {
     @Test
     public void MemberDeletionIsInvalid_ShouldReturnFalse() {
     }
+
+    /* -------------------------------------------------------
+     * OTHER
+     * -------------------------------------------------------*/
+
+
+
+
 
 }

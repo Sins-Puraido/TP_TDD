@@ -24,4 +24,6 @@ public class Reservation extends PersistentEntity {
 
     private Date EndDate;
 
+    private boolean status;
+
 }

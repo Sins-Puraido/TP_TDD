@@ -29,5 +29,9 @@ public interface MemberDataService {
     default List<Reservation> getMemberReservation(String code){
         return new ArrayList<Reservation>();
     };
+
+    default List<Reservation> getMemberCurrentReservation(String code){
+        return new ArrayList<Reservation>();
+    };
 }
 

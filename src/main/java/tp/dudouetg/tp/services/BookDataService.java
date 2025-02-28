@@ -41,4 +41,11 @@ public interface BookDataService {
         return false;
    }
 
+    default boolean isBookAvailable(String isbn){
+        return true;
+    };
+
+    default boolean changeBookStatus(String isbn) {
+        return true;
+    }
 }

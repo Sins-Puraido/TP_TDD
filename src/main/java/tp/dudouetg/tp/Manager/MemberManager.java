@@ -65,6 +65,7 @@ public class MemberManager {
         return reservationDataService.getReservationFromMember(code);
     }
 
+
     public void deleteMember(String number) {
         memberDataService.removeMember(number);
     }

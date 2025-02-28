@@ -10,6 +10,7 @@ import tp.dudouetg.tp.model.Book;
 import tp.dudouetg.tp.model.Member;
 import tp.dudouetg.tp.model.Reservation;
 import tp.dudouetg.tp.services.MemberDataService;
+import tp.dudouetg.tp.services.ReservationDataService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,12 +26,14 @@ import static org.mockito.Mockito.when;
 public class MemberManagerTest {
 
     private MemberDataService fakeDatabaseService;
+    private ReservationDataService fakeReservationDataService;
     private MemberManager memberManager;
 
     @BeforeEach
     public void setUp() {
         fakeDatabaseService = mock(MemberDataService.class);
-        MemberManager memberManager = new MemberManager(fakeDatabaseService);
+        fakeReservationDataService = mock(ReservationDataService.class);
+        memberManager = new MemberManager(fakeDatabaseService, fakeReservationDataService);
     }
 
     /* -------------------------------------------------------
@@ -65,7 +68,7 @@ public class MemberManagerTest {
 
     @Test
     public void MemberInvalideEmailFormat_ShouldReturnExcpetion(){
-        Member invalidMember = new Member("031245","john", "doe", "john.doeexample.com", "08/07/2032", "1");
+        Member invalidMember = new Member("031245","john", "doe", "john.doeexample.com", "08/07/2002", "1");
 
         assertThrows(InvalidMailSyntaxe.class, () -> memberManager.createMember(invalidMember));
     }
@@ -91,24 +94,23 @@ public class MemberManagerTest {
 
     @Test
     public void GetMemberReservations_shouldReturnReservationList() throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
-        Member member = new Member("M001", "Dupont", "Jean", "jean.dupont@email.com", "12-03-1990", "M.");
+        Member member = new Member("M001", "Dupont", "Jean", "jean.dupont@email.com", "12/03/1990", "M.");
 
         Book book1 = new Book("L'Étranger", "Albert Camus", "2070360024", "Gallimard", "Broché", true);
         Book book2 = new Book("1984", "George Orwell", "2070256626", "Secker & Warburg", "Poche", true);
         Book book3 = new Book("Le Petit Prince", "Antoine de Saint-Exupéry", "2070256626", "Reynal & Hitchcock", "Relié", false);
 
         List<Reservation> reservations = Arrays.asList(
-                new Reservation(book1, member, formatter.parse("01-02-2024"), formatter.parse("1-03-2024"), true),
-                new Reservation(book2, member, formatter.parse("10-03-2024"), formatter.parse("24-03-2024"), false),
-                new Reservation(book3, member, formatter.parse("20-04-2024"), formatter.parse("05-05-2024"), true)
+                new Reservation(book1, member, formatter.parse("01/02/2024"), formatter.parse("01/03/2024"), true),
+                new Reservation(book2, member, formatter.parse("10/03/2024"), formatter.parse("24/03/2024"), false),
+                new Reservation(book3, member, formatter.parse("20/04/2024"), formatter.parse("05/05/2024"), true)
         );
 
-        when(fakeDatabaseService.getMemberReservation("M001")).thenReturn(reservations);
+        when(fakeReservationDataService.getReservationFromMember("M001")).thenReturn(reservations);
 
-        assertEquals(memberManager.getReservationList(member.getCode()), reservations);
-
+        assertEquals(reservations, memberManager.getReservationList(member.getCode()));
     }
 
 
@@ -122,9 +124,8 @@ public class MemberManagerTest {
         Member expectedMember = new Member("031245","jack", "doe", "john.doe@example.com", "08/07/2002", "1");
         String newName = "jack";
         when(fakeDatabaseService.updateMember(member, "name", newName)).thenReturn(expectedMember);
-        Member updatedBook = memberManager.updateMemberInfo(member, "na:e", "jack");
-        assertEquals(expectedMember.toString(), updatedBook.toString());
-
+        Member updatedMember = memberManager.updateMemberInfo(member, "name", "jack");
+        assertEquals(expectedMember.toString(), updatedMember.toString());
     }
 
 
@@ -135,7 +136,6 @@ public class MemberManagerTest {
     public void MemberDeletionIsValid_ShouldReturnTrue() {
         when(fakeDatabaseService.removeMember("2253009687")).thenThrow(IsdbNotInDBException.class);
         assertThrows(IsdbNotInDBException.class, () -> memberManager.deleteMember("2253009687"));
-
     }
 
     /* -------------------------------------------------------

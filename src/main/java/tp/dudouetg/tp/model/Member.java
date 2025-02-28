@@ -39,7 +39,7 @@ public class Member extends PersistentEntity {
         this.email = email;
         this.civility = civility;
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         try {
             this.birthdate = formatter.parse(stringBirthdate);
         } catch (ParseException e) {

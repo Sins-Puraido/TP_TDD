@@ -3,10 +3,7 @@ package tp.dudouetg.tp.Manager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import tp.dudouetg.tp.exception.InvalidBookFormatException;
-import tp.dudouetg.tp.exception.InvalidFieldNameException;
-import tp.dudouetg.tp.exception.InvalidIsbnLengthException;
-import tp.dudouetg.tp.exception.IsdbNotInDBException;
+import tp.dudouetg.tp.exception.*;
 import tp.dudouetg.tp.model.Book;
 import tp.dudouetg.tp.services.BookDataService;
 
@@ -34,11 +31,11 @@ public class BookManagerTest {
      * -------------------------------------------------------*/
     @Test
     public void BookCreationIsValid_getBookFromDB() {
-        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
         when(fakeDatabaseService.saveBook(book)).thenReturn(book);
         Book savedBook = bookManager.createBook(book);
         assertNotNull(savedBook);
-        assertEquals("1234567890", savedBook.getIsbn());
+        assertEquals("2253009687", savedBook.getIsbn());
         verify(fakeDatabaseService, times(1)).saveBook(book);
     }
 
@@ -50,15 +47,22 @@ public class BookManagerTest {
 
     }
 
+    @Test
+    public void BookCreationAsMissingValues_ShouldThrowException() {
+        Book book = new Book("1984", "", "2253009687", "Secker & Warburg", "Poche", true);
+
+        assertThrows(MissingBookInformations.class, () -> bookManager.createBook(book));
+    }
+
     /* -------------------------------------------------------
      * READ
      * -------------------------------------------------------*/
 
     @Test
     public void getBookByAuthor_shouldReturnBookArray() {
-        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        Book book2 = new Book("1984", "George", "1234567890", "Secker & Warburg", "Poche", true);
-        Book book3 = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        Book book2 = new Book("1984", "George", "2253009687", "Secker & Warburg", "Poche", true);
+        Book book3 = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
         when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book, book3));
         assertEquals(2, bookManager.getBooksByAuthor("George Orwell").size());
 
@@ -66,9 +70,9 @@ public class BookManagerTest {
 
     @Test
     public void getBookByName_shouldReturnBookArray() {
-        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        Book book2 = new Book("1984", "George Orwell", "1234567890", "Harper Perennial", "Poche", true);
-        Book book3 = new Book("la ferme aux animaux", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
+        Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        Book book2 = new Book("1984", "George Orwell", "2253009687", "Harper Perennial", "Poche", true);
+        Book book3 = new Book("la ferme aux animaux", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
 
         when(fakeDatabaseService.getBookByAuthor("George Orwell")).thenReturn(List.of(book, book2));
         assertEquals(2, bookManager.getBooksByAuthor("George Orwell").size());
@@ -77,9 +81,9 @@ public class BookManagerTest {
     @Test
     public void givenBookIsInDB_getBookDataFromDB()
     {
-        Book book = new Book("1984", "George Orwell", "1234567890", "Secker & Warburg", "Poche", true);
-        when(fakeDatabaseService.getBook("1234567890")).thenReturn(book);
-        assertEquals(book, bookManager.getBook("1234567890"));
+        Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        when(fakeDatabaseService.getBook("2253009687")).thenReturn(book);
+        assertEquals(book, bookManager.getBook("2253009687"));
     }
 
     @Test
@@ -160,7 +164,11 @@ public class BookManagerTest {
 
     @Test
     public void BookDeletionWorked_ShouldReturnTrue() {
-        assertTrue(bookManager.deleteBook("2253009687"));
+        Book book = new Book("1984", "George Orwell", "2253009687", "Secker & Warburg", "Poche", true);
+        assertFalse(bookManager.deleteBook("2253009687"));
+
+        verify(fakeDatabaseService, times(1)).removeBook("2253009687");
+
     }
 
     /* -------------------------------------------------------

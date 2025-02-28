@@ -2,12 +2,15 @@ package tp.dudouetg.tp.Manager;
 
 import tp.dudouetg.tp.exception.InvalidBookFormatException;
 import tp.dudouetg.tp.exception.InvalidFieldNameException;
+import tp.dudouetg.tp.exception.MissingBookInformations;
 import tp.dudouetg.tp.model.Book;
 import tp.dudouetg.tp.services.BookDataService;
 import tp.dudouetg.tp.services.IsbnValidator;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class BookManager {
@@ -23,7 +26,13 @@ public class BookManager {
     }
 
     public Book createBook(Book book) {
+
         isValidBookIsbn(book.getIsbn());
+
+        //verify if the book informations are complete
+        if(!getMissingFields(book).isEmpty()){
+            throw new MissingBookInformations("Book entry is missing data for :" + getMissingFields(book).toString());
+        }
         return databaseService.saveBook(book);
     }
 
@@ -77,6 +86,7 @@ public class BookManager {
         return databaseService.removeBook(isbn);
     }
 
+
     public boolean isValidfield(String fieldname, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getName().equals(fieldname)) {
@@ -84,5 +94,28 @@ public class BookManager {
             }
         }
         return false;
+    }
+
+    public List<String> getMissingFields(Book book) {
+        List<String> missingFields = new ArrayList<>();
+
+        if (book.getTitle() == null || book.getTitle().isEmpty()) {
+            missingFields.add("title");
+        }
+        if (book.getAuthor() == null || book.getAuthor().isEmpty()) {
+            missingFields.add("author");
+        }
+        if (book.getIsbn() == null || book.getIsbn().isEmpty()) {
+            missingFields.add("isbn");
+        }
+        if (book.getPublisher() == null || book.getPublisher().isEmpty()) {
+            missingFields.add("publisher");
+        }
+        if (book.getFormat() == null || book.getFormat().isEmpty()) {
+            missingFields.add("format");
+        }
+
+        return missingFields;
+
     }
 }
